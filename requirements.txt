@@ -1,0 +1,13 @@
+pip
+setuptools
+wheel
+fastapi
+uvicorn
+sqlalchemy
+alembic
+pydantic
+python-dotenv
+gunicorn
+celery
+flower
+aioredis
