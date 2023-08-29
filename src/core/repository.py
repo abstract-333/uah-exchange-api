@@ -11,6 +11,6 @@ class Repository:
             status_code = response.status_code
 
             if status_code != 200:
-                return status_code, None
+                return status_code, response.headers
 
             return status_code, response.json()

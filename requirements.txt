@@ -1,14 +1,13 @@
 pip
 setuptools
 wheel
-fastapi
-uvicorn
 sqlalchemy
 alembic
-pydantic
 python-dotenv
 gunicorn
 celery
 flower
-aioredis
+fastapi[all]
+fastapi-cache2[redis]
 httpx
+token-throttler
