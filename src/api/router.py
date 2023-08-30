@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import Response
+
+from services.centralbank_service import CentralBankService
 from services.privatebank_service import PrivatBankService
 from .docs import get_exchange_rate_doc
 from services.monobank_service import MonoBankService
@@ -26,9 +28,11 @@ async def get_online_exchange_rate(
 ):
     try:
         list_of_rates = []
+        centralbank_exchange_online: dict = await CentralBankService().get_online_exchange_rate()
         privatbank_exchange_online: dict = await PrivatBankService().get_online_exchange_rate()
         monobank_exchange_online: dict = await MonoBankService().get_online_exchange_rate()
 
+        list_of_rates.append(centralbank_exchange_online)
         list_of_rates.append(privatbank_exchange_online)
         list_of_rates.append(monobank_exchange_online)
 
