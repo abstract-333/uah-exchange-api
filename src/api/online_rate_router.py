@@ -9,13 +9,13 @@ from utils.exceptions import TooManyRequests
 from .schemas import ExchangeRate
 
 online_rate_router = APIRouter(
-    prefix="/exchange-rate",
+    prefix="/currency",
     tags=["All Banks"],
 )
 
 
 @online_rate_router.get(
-    path='/all-online',
+    path='/online/all',
     response_model=list[dict[str, list[ExchangeRate]]],
     responses=get_exchange_rate_doc,
 )
@@ -42,7 +42,7 @@ async def get_online_exchange_rate(
 
 
 @online_rate_router.get(
-    path='/all-cash',
+    path='/cash/all',
     response_model=list[dict[str, list[ExchangeRate]]],
     responses=get_exchange_rate_doc
 )

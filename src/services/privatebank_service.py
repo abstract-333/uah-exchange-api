@@ -1,6 +1,5 @@
 import time
-from datetime import datetime
-from typing import Final, List, Any, Coroutine, Dict
+from typing import Final, List
 
 from api.schemas import ExchangeRate
 from core.repository import Repository
@@ -20,7 +19,7 @@ class PrivatBankService:
         if status_code == 429:
             raise TooManyRequests
 
-        rates_list: list = await self.convert_dict_to_list_pydantic(response)
+        rates_list: list = await self.convert_dict_to_list(response)
         return {"privatbank": rates_list}
 
     async def get_cash_exchange_rate(self) -> dict[str, list]:
@@ -30,10 +29,11 @@ class PrivatBankService:
         if status_code == 429:
             raise TooManyRequests
 
-        rates_list: list = await self.convert_dict_to_list_pydantic(response)
+        rates_list: list = await self.convert_dict_to_list(response)
         return {"privatbank": rates_list}
 
-    async def convert_dict_to_list_pydantic(self, entered_list: List) -> list[ExchangeRate]:
+    @staticmethod
+    async def convert_dict_to_list(entered_list: List) -> list[ExchangeRate]:
         exchange_rate_list = [
             ExchangeRate(
                 first_currency=row["ccy"],
