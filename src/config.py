@@ -12,3 +12,5 @@ DB_NAME = os.environ.get("DB_NAME")
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 API_KEY = os.environ.get("API_KEY")
+
+REDIS_SECRET_KEY = os.environ.get("REDIS_SECRET_KEY")

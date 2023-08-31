@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from fastapi_cache.decorator import cache
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import Response
@@ -21,7 +22,7 @@ online_rate_router = APIRouter(
     response_model=list[dict[str, list[ExchangeRate]]],
     responses=get_exchange_rate_doc,
 )
-# @cache(expire=60)  # 1 minute
+@cache(expire=60)  # 1 minute
 async def get_online_exchange_rate(
         request: Request,
         response: Response,
