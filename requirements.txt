@@ -1,5 +1,6 @@
 pip
 setuptools
+requests
 wheel
 sqlalchemy
 alembic

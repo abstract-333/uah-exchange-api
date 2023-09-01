@@ -1,15 +1,16 @@
+import asyncio
+import time
 from fastapi import APIRouter, HTTPException
-from fastapi_cache.decorator import cache
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import Response
 
 from services.centralbank_service import CentralBankService
-from services.privatebank_service import PrivatBankService
-from .docs import get_exchange_rate_doc
 from services.monobank_service import MonoBankService
+from services.privatebank_service import PrivatBankService
 from utils.exceptions import TooManyRequests
-from .schemas import ExchangeRate
+from .docs import get_exchange_rate_doc
+from .schemas import BankExchangeRate
 
 online_rate_router = APIRouter(
     prefix="/currency",
@@ -19,24 +20,30 @@ online_rate_router = APIRouter(
 
 @online_rate_router.get(
     path='/online/all',
-    response_model=list[dict[str, list[ExchangeRate]]],
+    response_model=list[BankExchangeRate],
     responses=get_exchange_rate_doc,
 )
-@cache(expire=60)  # 1 minute
+# @cache(expire=60)  # 1 minute
 async def get_online_exchange_rate(
         request: Request,
         response: Response,
 ):
     try:
+        start_time = time.time()
+
+        banks = [CentralBankService(), PrivatBankService(), MonoBankService()]
+
+        tasks = [
+            bank_service.get_online_exchange_rate() for bank_service in banks
+        ]
+
+        # Run the tasks concurrently
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
         list_of_rates = []
-        centralbank_exchange_online: dict = await CentralBankService().get_online_exchange_rate()
-        privatbank_exchange_online: dict = await PrivatBankService().get_online_exchange_rate()
-        monobank_exchange_online: dict = await MonoBankService().get_online_exchange_rate()
+        list_of_rates.extend(results)
 
-        list_of_rates.append(centralbank_exchange_online)
-        list_of_rates.append(privatbank_exchange_online)
-        list_of_rates.append(monobank_exchange_online)
-
+        print(time.time() - start_time)
         return list_of_rates
 
     except TooManyRequests:
@@ -48,7 +55,7 @@ async def get_online_exchange_rate(
 
 @online_rate_router.get(
     path='/cash/all',
-    response_model=list[dict[str, list[ExchangeRate]]],
+    response_model=list[BankExchangeRate],
     responses=get_exchange_rate_doc
 )
 # @cache(expire=60)  # 1 minute
@@ -57,11 +64,21 @@ async def get_cash_exchange_rate(
         response: Response,
 ):
     try:
+        start_time = time.time()
+
+        banks_services = [PrivatBankService()]
+
+        tasks = [
+            bank_service.get_online_exchange_rate() for bank_service in banks_services
+        ]
+
+        # Run the tasks concurrently
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
         list_of_rates = []
-        privatbank_exchange_online: dict = await PrivatBankService().get_cash_exchange_rate()
+        list_of_rates.extend(results)
 
-        list_of_rates.append(privatbank_exchange_online)
-
+        print(time.time() - start_time)
         return list_of_rates
 
     except TooManyRequests:
@@ -69,5 +86,4 @@ async def get_cash_exchange_rate(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Too many requests"
         )
-
 

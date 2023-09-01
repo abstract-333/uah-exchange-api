@@ -1,6 +1,6 @@
 from typing import Final
 
-from api.schemas import ExchangeRate, InternationalCurrency, NationalCurrency
+from api.schemas import ExchangeRate, InternationalCurrency, NationalCurrency, BankExchangeRate
 from core.repository import Repository
 from core.urls import MONO_BANK_ONLINE
 from core.service import Service
@@ -13,8 +13,9 @@ class MonoBankService(Service):
     first_appeared_currency: Final = InternationalCurrency.usd
     second_appeared_currency: Final = InternationalCurrency.eur
 
-    async def get_online_exchange_rate(self) -> dict[str, list]:
+    async def get_online_exchange_rate(self) -> BankExchangeRate:
         """Get online exchange rate in MonoBank"""
+
         status_code, response = await self.repo.get_request(url=self.url_online)
 
         if status_code == 429:
@@ -37,4 +38,7 @@ class MonoBankService(Service):
             second_appeared_currency=self.second_appeared_currency
         )
 
-        return {"MonoBank": ordered_rates_list}
+        return BankExchangeRate(
+            bank_name="MonoBank",
+            rates=ordered_rates_list
+        )

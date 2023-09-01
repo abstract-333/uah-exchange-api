@@ -35,6 +35,7 @@ async def startup_event():
         encoding="utf8",
         decode_responses=True
     )
+
     FastAPICache.init(backend=RedisBackend(redis), prefix="fastapi-cache")
 
 

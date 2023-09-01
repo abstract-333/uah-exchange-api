@@ -20,3 +20,8 @@ class ExchangeRate(BaseModel):
     date: str = Field(description="Unix time from 1970", default=str(int(time.time())))
     buy: float = Field(examples=[37.75])
     sell: float = Field(examples=[38.75])
+
+
+class BankExchangeRate(BaseModel):
+    bank_name: str = Field(examples=["PrivatBank", "MonoBank"])
+    rates: list[ExchangeRate]

@@ -1,6 +1,6 @@
 from typing import Final, List
 
-from api.schemas import ExchangeRate, InternationalCurrency
+from api.schemas import ExchangeRate, InternationalCurrency, BankExchangeRate
 from core.repository import Repository
 from core.urls import PRIVAT_BANK_ONLINE, PRIVAT_BANK_CASH
 from core.service import Service
@@ -14,7 +14,7 @@ class PrivatBankService(Service):
     first_appeared_currency: Final = InternationalCurrency.usd
     second_appeared_currency: Final = InternationalCurrency.eur
 
-    async def get_online_exchange_rate(self) -> dict[str, list]:
+    async def get_online_exchange_rate(self) -> BankExchangeRate:
         """Get online exchange rate in PrivatBank"""
         status_code, response = await self.repo.get_request(url=self.url_online)
 
@@ -28,9 +28,12 @@ class PrivatBankService(Service):
             second_appeared_currency=self.second_appeared_currency
         )
 
-        return {"PrivatBank": ordered_rates_list}
+        return BankExchangeRate(
+            bank_name="PrivatBank",
+            rates=ordered_rates_list
+        )
 
-    async def get_cash_exchange_rate(self) -> dict[str, list]:
+    async def get_cash_exchange_rate(self) -> BankExchangeRate:
         """Get cash exchange rate in PrivatBank"""
         status_code, response = await self.repo.get_request(url=self.url_cash)
 
@@ -44,7 +47,11 @@ class PrivatBankService(Service):
             first_appeared_currency=self.first_appeared_currency,
             second_appeared_currency=self.second_appeared_currency
         )
-        return {"PrivatBank": ordered_rates_list}
+
+        return BankExchangeRate(
+            bank_name="PrivatBank",
+            rates=ordered_rates_list
+        )
 
     @staticmethod
     async def convert_dict_to_list(entered_list: List) -> list[ExchangeRate]:
@@ -58,4 +65,3 @@ class PrivatBankService(Service):
             for row in entered_list
         ]
         return exchange_rate_list
-
