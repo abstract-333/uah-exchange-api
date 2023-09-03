@@ -16,7 +16,7 @@ class MonoBankService(Service):
 
     async def get_online_exchange_rate(self) -> BankExchangeRate | None:
         """Get online exchange rate in MonoBank"""
-        status_code, response = await self.request_repo.get_request(url=self.url_online)
+        status_code, response = await self.request_repo.get_request_json(url=self.url_online)
 
         if status_code == 429:
             # If there is no date available form server, use cache

@@ -42,7 +42,7 @@ async def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    await FastAPICache.clear()
+    await FastAPICache.clear("fastapi-cache")
 
 
 for router in all_routers:

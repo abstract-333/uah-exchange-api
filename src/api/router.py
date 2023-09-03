@@ -1,6 +1,6 @@
 import asyncio
 import time
-
+import httpx
 import requests
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, HTTPException
@@ -9,7 +9,7 @@ from pydantic import ValidationError
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import Response
-
+from services.avalbank_service import AvalBankService
 from services.centralbank_service import CentralBankService
 from services.monobank_service import MonoBankService
 from services.privatebank_service import PrivatBankService
@@ -74,10 +74,10 @@ async def get_cash_exchange_rate(
     try:
         start_time = time.time()
 
-        banks_services = [PrivatBankService()]
+        banks_services = [PrivatBankService(), AvalBankService()]
 
         tasks = [
-            bank_service.get_online_exchange_rate() for bank_service in banks_services
+            bank_service.get_cash_exchange_rate() for bank_service in banks_services
         ]
 
         # Run the tasks concurrently
@@ -108,21 +108,23 @@ async def get_aval(
 ):
     try:
         start_time = time.time()
-        url = 'https://www.rbc.ua/ukr/currency/USD'  # URL to scrape
-        response = requests.get(url).text
-
-        soup = BeautifulSoup(response, 'lxml')
-
-        rates = soup.find_all("div", class_="table-wrapper")[1].find_all('td')
-        print(rates)
-        for rate in rates:
-            if rate.text == "Райффайзен Банк Аваль":
-                index_bank = rates.index(rate)
-                print(time.time() - start_time)
-                return {
-                    "Buy": rates[index_bank + 1].text,
-                    "Sell": rates[index_bank + 2].text
-                }
+        url = 'https://raiffeisen.ua'  # URL to scrape
+        # response = requests.get(url).text
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            soup = BeautifulSoup(response.text, 'lxml')
+            print(soup)
+            rates = soup.find_all("div", class_="bank-info__table-column")
+            print(rates)
+            # print(rates)
+            # for rate in rates:
+            #     if rate.text == "Райффайзен Банк Аваль":
+            #         index_bank = rates.index(rate)
+            #         print(time.time() - start_time)
+            #         return {
+            #             "Buy": rates[index_bank + 1].text,
+            #             "Sell": rates[index_bank + 2].text
+            #         }
 
     except TooManyRequests:
         raise HTTPException(
