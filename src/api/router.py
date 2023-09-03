@@ -1,7 +1,11 @@
 import asyncio
 import time
+
+import requests
+from bs4 import BeautifulSoup
 from fastapi import APIRouter, HTTPException
 from fastapi_cache.decorator import cache
+from pydantic import ValidationError
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import Response
@@ -21,10 +25,10 @@ online_rate_router = APIRouter(
 
 @online_rate_router.get(
     path='/online/all',
-    response_model=list[BankExchangeRate],
+    response_model=list[BankExchangeRate | None],
     responses=get_exchange_rate_doc,
 )
-@cache(expire=60 * 2)  # 2 minutes
+# @cache(expire=60 * 2)  # 2 minutes
 async def get_online_exchange_rate(
         request: Request,
         response: Response,
@@ -41,8 +45,8 @@ async def get_online_exchange_rate(
         # Run the tasks concurrently
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        list_of_rates = []
-        list_of_rates.extend(results)
+        # Add all values that are not None
+        list_of_rates = [element for element in results if element is not None]
 
         print(time.time() - start_time)
         return list_of_rates
@@ -53,13 +57,16 @@ async def get_online_exchange_rate(
             detail="Too many requests"
         )
 
+    except ValidationError as exc:
+        print(repr(exc.errors()[0]['type']))
+
 
 @online_rate_router.get(
     path='/cash/all',
-    response_model=list[BankExchangeRate],
+    response_model=list[BankExchangeRate | None],
     responses=get_exchange_rate_doc
 )
-@cache(expire=60 * 2)  # 2 minutes
+# @cache(expire=60 * 2)  # 2 minutes
 async def get_cash_exchange_rate(
         request: Request,
         response: Response,
@@ -76,8 +83,8 @@ async def get_cash_exchange_rate(
         # Run the tasks concurrently
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        list_of_rates = []
-        list_of_rates.extend(results)
+        # Add all values that are not None
+        list_of_rates = [element for element in results if element is not None]
 
         print(time.time() - start_time)
         return list_of_rates
@@ -88,3 +95,37 @@ async def get_cash_exchange_rate(
             detail="Too many requests"
         )
 
+
+@online_rate_router.get(
+    path='/aval',
+    # response_model=list[BankExchangeRate | None],
+    responses=get_exchange_rate_doc
+)
+# @cache(expire=60 * 2)  # 2 minutes
+async def get_aval(
+        request: Request,
+        response: Response,
+):
+    try:
+        start_time = time.time()
+        url = 'https://www.rbc.ua/ukr/currency/USD'  # URL to scrape
+        response = requests.get(url).text
+
+        soup = BeautifulSoup(response, 'lxml')
+
+        rates = soup.find_all("div", class_="table-wrapper")[1].find_all('td')
+        print(rates)
+        for rate in rates:
+            if rate.text == "Райффайзен Банк Аваль":
+                index_bank = rates.index(rate)
+                print(time.time() - start_time)
+                return {
+                    "Buy": rates[index_bank + 1].text,
+                    "Sell": rates[index_bank + 2].text
+                }
+
+    except TooManyRequests:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many requests"
+        )

@@ -1,6 +1,6 @@
 import time
 from enum import Enum
-from typing import Final
+from typing import Final, Optional
 
 from pydantic import BaseModel, Field
 
@@ -25,3 +25,4 @@ class ExchangeRate(BaseModel):
 class BankExchangeRate(BaseModel):
     bank_name: str = Field(examples=["PrivatBank", "MonoBank"])
     rates: list[ExchangeRate]
+

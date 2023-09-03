@@ -1,25 +1,27 @@
 from typing import Final, List
-
 from api.schemas import ExchangeRate, InternationalCurrency, BankExchangeRate
 from core.repository import Repository
-from core.urls import PRIVAT_BANK_ONLINE, PRIVAT_BANK_CASH
+from core.urls import PRIVAT_BANK_ONLINE_URL, PRIVAT_BANK_CASH_URL
 from core.service import Service
-from utils.exceptions import TooManyRequests
+from redis_manager.repository import RedisRepository
 
 
 class PrivatBankService(Service):
-    url_online: Final = PRIVAT_BANK_ONLINE
-    url_cash: Final = PRIVAT_BANK_CASH
-    repo: Final = Repository()
+    url_online: Final = PRIVAT_BANK_ONLINE_URL
+    url_cash: Final = PRIVAT_BANK_CASH_URL
+    request_repo: Final = Repository()
+    redis_repo: Final = RedisRepository(name="PrivatBank")
     first_appeared_currency: Final = InternationalCurrency.usd
     second_appeared_currency: Final = InternationalCurrency.eur
 
-    async def get_online_exchange_rate(self) -> BankExchangeRate:
+    async def get_online_exchange_rate(self) -> BankExchangeRate | None:
         """Get online exchange rate in PrivatBank"""
-        status_code, response = await self.repo.get_request(url=self.url_online)
+        status_code, response = await self.request_repo.get_request(url=self.url_online)
 
         if status_code == 429:
-            raise TooManyRequests
+            # If there is no date available form server, use cache
+            cached_exchange_rate = await self.redis_repo.get_stored_data()
+            return BankExchangeRate(**cached_exchange_rate)
 
         rates_list: list = await self.convert_dict_to_list(response)
         ordered_rates_list: list = await self.set_two_first_appeared(
@@ -28,17 +30,23 @@ class PrivatBankService(Service):
             second_appeared_currency=self.second_appeared_currency
         )
 
-        return BankExchangeRate(
+        returned_rate_bank = BankExchangeRate(
             bank_name="PrivatBank",
             rates=ordered_rates_list
         )
 
-    async def get_cash_exchange_rate(self) -> BankExchangeRate:
+        await self.redis_repo.store_value(keys=returned_rate_bank.model_dump())
+
+        return returned_rate_bank
+
+    async def get_cash_exchange_rate(self) -> BankExchangeRate | None:
         """Get cash exchange rate in PrivatBank"""
-        status_code, response = await self.repo.get_request(url=self.url_cash)
+        status_code, response = await self.request_repo.get_request(url=self.url_cash)
 
         if status_code == 429:
-            raise TooManyRequests
+            # If there is no date available form server, use cache
+            cached_exchange_rate = await self.redis_repo.get_stored_data()
+            return BankExchangeRate(**cached_exchange_rate)
 
         rates_list: list = await self.convert_dict_to_list(response)
 
@@ -47,11 +55,14 @@ class PrivatBankService(Service):
             first_appeared_currency=self.first_appeared_currency,
             second_appeared_currency=self.second_appeared_currency
         )
-
-        return BankExchangeRate(
+        returned_rate_bank = BankExchangeRate(
             bank_name="PrivatBank",
             rates=ordered_rates_list
         )
+
+        await self.redis_repo.store_value(keys=returned_rate_bank.model_dump())
+
+        return returned_rate_bank
 
     @staticmethod
     async def convert_dict_to_list(entered_list: List) -> list[ExchangeRate]:

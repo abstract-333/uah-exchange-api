@@ -12,3 +12,5 @@ fastapi[all]
 fastapi-cache2[redis]
 httpx
 token-throttler
+beautifulsoup4
+lxml

@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Depends
+from typing import Final
+from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-from redis import asyncio as aioredis
+from redis import asyncio as aioredis, Redis
+from redis.client import Redis
 from starlette.responses import JSONResponse
-
 from config import REDIS_SECRET_KEY
 from routers import all_routers
 
@@ -28,14 +29,14 @@ async def validation_exception_handler(request, err):
     )
 
 
+# redis_manager: Redis
 @app.on_event("startup")
 async def startup_event():
-    redis = aioredis.from_url(
+    redis: Final[Redis] = await aioredis.from_url(
         url=f"rediss://red-cjo66k358phs738s90fg:{REDIS_SECRET_KEY}@frankfurt-redis.render.com:6379",
         encoding="utf8",
         decode_responses=True
     )
-
     FastAPICache.init(backend=RedisBackend(redis), prefix="fastapi-cache")
 
 

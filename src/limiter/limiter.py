@@ -44,8 +44,8 @@ class BucketLimiter:
             },
         ]
 
-        # Add redis as data storage for our buckets
-        redis = aioredis.from_url("redis://localhost:6379", max_connections=100)
+        # Add redis_manager as data storage for our buckets
+        redis = aioredis.from_url("redis_manager://localhost:6379", max_connections=100)
         redis_storage = RedisStorageAsync(redis=redis, delimiter="||")
         self.throttler: TokenThrottlerAsync = TokenThrottlerAsync(
             1, redis_storage)
