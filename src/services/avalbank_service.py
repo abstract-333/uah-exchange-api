@@ -1,6 +1,6 @@
 from typing import Final
 from bs4 import BeautifulSoup
-from api.schemas import ExchangeRate, InternationalCurrency, NationalCurrency, BankExchangeRate
+from api.schemas import ExchangeRate, NationalCurrency, BankExchangeRate
 from core.repository import Repository
 from core.service import Service
 from core.urls import AVAL_BANK_ONLINE_CASH_URL
@@ -8,30 +8,24 @@ from redis_manager.repository import RedisRepository
 
 
 class AvalBankService(Service):
-    url_online: Final = AVAL_BANK_ONLINE_CASH_URL
+    bank_name: Final[str] = "AvalBank"
+    url_online: Final[str] = AVAL_BANK_ONLINE_CASH_URL
     request_repo: Final = Repository()
-    redis_repo: Final = RedisRepository(name="AvalBank")
-    first_appeared_currency: Final = InternationalCurrency.usd
-    second_appeared_currency: Final = InternationalCurrency.eur
+    redis_repo: Final = RedisRepository(name=bank_name)
 
     async def get_cash_exchange_rate(self) -> BankExchangeRate | None:
         """Get online exchange rate in Aval Bank"""
 
         # Generate tasks to asynchronously exchange rate for the first and second currencies
         tasks = [
-            self._get_cash_currency_rate(currency_target=self.first_appeared_currency),
-            self._get_cash_currency_rate(currency_target=self.second_appeared_currency),
+            self._parse_cash_exchange_rate(currency_target=self.first_appeared_currency),
+            self._parse_cash_exchange_rate(currency_target=self.second_appeared_currency),
         ]
 
         executed_tasks = await self.execute_tasks(tasks)
 
-        # ordered_rates_list: list = await self.set_two_first_appeared(
-        #     unordered_list=executed_tasks,
-        #     first_appeared_currency=self.first_appeared_currency,
-        #     second_appeared_currency=self.second_appeared_currency
-        # )
         returned_rate_bank = BankExchangeRate(
-            bank_name="AvalBank",
+            bank_name=self.bank_name,
             rates=executed_tasks
         )
 
@@ -39,7 +33,7 @@ class AvalBankService(Service):
 
         return returned_rate_bank
 
-    async def _get_cash_currency_rate(self, currency_target: str) -> ExchangeRate | None:
+    async def _parse_cash_exchange_rate(self, currency_target: str) -> ExchangeRate | None:
         """Get exchange rate for currency variable by parsing html web page"""
         status_code, page = await self.request_repo.get_request_text(url=self.url_online + currency_target)
 

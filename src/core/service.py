@@ -1,9 +1,12 @@
 import asyncio
+from typing import Final
 
-from api.schemas import ExchangeRate
+from api.schemas import ExchangeRate, InternationalCurrency
 
 
 class Service:
+    first_appeared_currency: Final = InternationalCurrency.usd
+    second_appeared_currency: Final = InternationalCurrency.eur
 
     @staticmethod
     async def set_two_first_appeared(

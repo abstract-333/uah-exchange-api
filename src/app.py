@@ -1,4 +1,6 @@
+from contextlib import asynccontextmanager
 from typing import Final
+from arel import HotReloadMiddleware
 from fastapi import FastAPI
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
@@ -15,6 +17,8 @@ app = FastAPI(
     #     time_unauthenticated=60,
     # ))]
 )
+
+# app.add_middleware(HotReloadMiddleware)
 
 
 @app.exception_handler(Exception)
@@ -42,7 +46,7 @@ async def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    await FastAPICache.clear("fastapi-cache")
+    await FastAPICache.clear()
 
 
 for router in all_routers:

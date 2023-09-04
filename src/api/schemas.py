@@ -13,7 +13,6 @@ class InternationalCurrency(str, Enum):
 class NationalCurrency(str, Enum):
     uah: Final = "UAH"
 
-
 class ExchangeRate(BaseModel):
     first_currency: InternationalCurrency = Field(max_length=3, min_length=3, examples=["USD", "EUR"])
     second_currency: NationalCurrency = Field(max_length=3, min_length=3, examples=["UAH"])
@@ -25,4 +24,3 @@ class ExchangeRate(BaseModel):
 class BankExchangeRate(BaseModel):
     bank_name: str = Field(examples=["PrivatBank", "MonoBank"])
     rates: list[ExchangeRate]
-

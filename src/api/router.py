@@ -1,7 +1,6 @@
 import asyncio
 import time
 import httpx
-import requests
 from bs4 import BeautifulSoup
 from fastapi import APIRouter, HTTPException
 from fastapi_cache.decorator import cache
@@ -9,6 +8,8 @@ from pydantic import ValidationError
 from starlette import status
 from starlette.requests import Request
 from starlette.responses import Response
+
+from core.service import Service
 from services.avalbank_service import AvalBankService
 from services.centralbank_service import CentralBankService
 from services.monobank_service import MonoBankService
@@ -42,11 +43,7 @@ async def get_online_exchange_rate(
             bank_service.get_online_exchange_rate() for bank_service in banks
         ]
 
-        # Run the tasks concurrently
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-
-        # Add all values that are not None
-        list_of_rates = [element for element in results if element is not None]
+        list_of_rates = await Service().execute_tasks(tasks)
 
         print(time.time() - start_time)
         return list_of_rates

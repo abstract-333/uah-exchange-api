@@ -7,12 +7,12 @@ from redis_manager.repository import RedisRepository
 
 
 class PrivatBankService(Service):
+    bank_name: Final[str] = "PrivatBank"
     url_online: Final = PRIVAT_BANK_ONLINE_URL
     url_cash: Final = PRIVAT_BANK_CASH_URL
     request_repo: Final = Repository()
-    redis_repo: Final = RedisRepository(name="PrivatBank")
-    first_appeared_currency: Final = InternationalCurrency.usd
-    second_appeared_currency: Final = InternationalCurrency.eur
+    redis_repo: Final = RedisRepository(name=bank_name)
+
 
     async def get_online_exchange_rate(self) -> BankExchangeRate | None:
         """Get online exchange rate in PrivatBank"""
@@ -31,7 +31,7 @@ class PrivatBankService(Service):
         )
 
         returned_rate_bank = BankExchangeRate(
-            bank_name="PrivatBank",
+            bank_name=self.bank_name,
             rates=ordered_rates_list
         )
 
@@ -56,7 +56,7 @@ class PrivatBankService(Service):
             second_appeared_currency=self.second_appeared_currency
         )
         returned_rate_bank = BankExchangeRate(
-            bank_name="PrivatBank",
+            bank_name=self.bank_name,
             rates=ordered_rates_list
         )
 

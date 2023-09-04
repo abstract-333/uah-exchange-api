@@ -1,7 +1,5 @@
 pip
 setuptools
-requests
-wheel
 sqlalchemy
 alembic
 python-dotenv

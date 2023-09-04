@@ -8,11 +8,10 @@ from redis_manager.repository import RedisRepository
 
 
 class MonoBankService(Service):
+    bank_name: Final[str] = "MonoBank"
     url_online: Final = MONO_BANK_ONLINE_URL
     request_repo: Final = Repository()
-    redis_repo: Final = RedisRepository(name="MonoBank")
-    first_appeared_currency: Final = InternationalCurrency.usd
-    second_appeared_currency: Final = InternationalCurrency.eur
+    redis_repo: Final = RedisRepository(name=bank_name)
 
     async def get_online_exchange_rate(self) -> BankExchangeRate | None:
         """Get online exchange rate in MonoBank"""
@@ -40,7 +39,7 @@ class MonoBankService(Service):
             second_appeared_currency=self.second_appeared_currency
         )
         returned_rate_bank = BankExchangeRate(
-            bank_name="MonoBank",
+            bank_name=self.bank_name,
             rates=ordered_rates_list
         )
 
