@@ -1,10 +1,11 @@
 from typing import Final
+
 from bs4 import BeautifulSoup
-from api.schemas import ExchangeRate, NationalCurrency, BankExchangeRate
-from core.repository import Repository
-from core.service import Service
-from core.urls import AVAL_BANK_ONLINE_CASH_URL
-from redis_manager.repository import RedisRepository
+from src.api.schemas import ExchangeRate, NationalCurrency, BankExchangeRate, InternationalCurrency
+from src.core.repository import Repository
+from src.core.service import Service
+from src.core.urls import AVAL_BANK_ONLINE_CASH_URL
+from src.redis_manager.repository import RedisRepository
 
 
 class AvalBankService(Service):
@@ -12,6 +13,9 @@ class AvalBankService(Service):
     url_online: Final[str] = AVAL_BANK_ONLINE_CASH_URL
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)
+
+    first_appeared_currency = InternationalCurrency.usd
+    second_appeared_currency = InternationalCurrency.eur
 
     async def get_cash_exchange_rate(self) -> BankExchangeRate | None:
         """Get online exchange rate in Aval Bank"""
@@ -24,6 +28,10 @@ class AvalBankService(Service):
 
         executed_tasks = await self.execute_tasks(tasks)
 
+        if not executed_tasks:
+            cached_exchange_rate = await self.redis_repo.get_stored_data()
+            return BankExchangeRate(**cached_exchange_rate)
+
         returned_rate_bank = BankExchangeRate(
             bank_name=self.bank_name,
             rates=executed_tasks
@@ -33,15 +41,15 @@ class AvalBankService(Service):
 
         return returned_rate_bank
 
-    async def _parse_cash_exchange_rate(self, currency_target: str) -> ExchangeRate | None:
+    async def _parse_cash_exchange_rate(self, currency_target: InternationalCurrency) -> ExchangeRate | None:
         """Get exchange rate for currency variable by parsing html web page"""
         status_code, page = await self.request_repo.get_request_text(url=self.url_online + currency_target)
-
-        soup = BeautifulSoup(page, 'lxml')
 
         # Return None if response is not success (not 200 status code)
         if status_code != 200:
             return None
+
+        soup = BeautifulSoup(page, 'lxml')
 
         rates = soup.find_all("div", class_="table-wrapper")[1].find_all('td')
         for rate in rates:
@@ -53,4 +61,4 @@ class AvalBankService(Service):
                     buy=rates[index_bank + 1].text,
                     sell=rates[index_bank + 2].text
                 )
-        # return None
+        return None

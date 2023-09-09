@@ -1,23 +1,25 @@
 from typing import Final
 
-from api.schemas import ExchangeRate, InternationalCurrency, NationalCurrency, BankExchangeRate
-from core.repository import Repository
-from core.urls import CENTRAL_BANK_ONLINE_URL
-from core.service import Service
-from redis_manager.repository import RedisRepository
+from src.api.schemas import ExchangeRate, InternationalCurrency, NationalCurrency, BankExchangeRate
+from src.core.repository import Repository
+from src.core.urls import CENTRAL_BANK_ONLINE_URL
+from src.core.service import Service
+from src.redis_manager.repository import RedisRepository
 
 
 class CentralBankService(Service):
-    bank_name: Final[str] = "CentralBanks"
+    bank_name: Final[str] = "CentralBank"
     url_online: Final = CENTRAL_BANK_ONLINE_URL
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)
 
+    first_appeared_currency = InternationalCurrency.usd
+    second_appeared_currency = InternationalCurrency.eur
     async def get_online_exchange_rate(self) -> BankExchangeRate | None:
         """Get online exchange rate in Central Bank of Ukraine (NBU)"""
         status_code, response = await self.request_repo.get_request_json(url=self.url_online)
 
-        if status_code == 429:
+        if status_code != 200:
             # If there is no date available form server, use cache
             cached_exchange_rate = await self.redis_repo.get_stored_data()
             return BankExchangeRate(**cached_exchange_rate)
@@ -33,11 +35,15 @@ class CentralBankService(Service):
                 )
                 exchange_rate_list.append(exchange_rate_row)
 
-        ordered_rates_list: list = await self.set_two_first_appeared(
+        ordered_rates_list: list[ExchangeRate] | None = await self.set_first_appeared_currencies(
             unordered_list=exchange_rate_list,
             first_appeared_currency=self.first_appeared_currency,
             second_appeared_currency=self.second_appeared_currency
         )
+
+        if ordered_rates_list is None:
+            cached_exchange_rate = await self.redis_repo.get_stored_data()
+            return BankExchangeRate(**cached_exchange_rate)
         returned_rate_bank = BankExchangeRate(
             bank_name=self.bank_name,
             rates=ordered_rates_list

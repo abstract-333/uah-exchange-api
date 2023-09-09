@@ -9,8 +9,8 @@ from redis import asyncio as aioredis, Redis
 from redis.client import Redis
 from starlette import status
 
-from config import REDIS_SECRET_KEY
-from routers import all_routers
+from src.config import REDIS_SECRET_KEY
+from src.routers import all_routers
 
 # Adding sentry to save logs and exception in server
 sentry_sdk.init(

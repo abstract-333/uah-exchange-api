@@ -1,19 +1,25 @@
 import asyncio
-from typing import Final
+from typing import Any
 
-from api.schemas import ExchangeRate, InternationalCurrency
+from src.api.schemas import InternationalCurrency, BankExchangeRate
 
 
 class Service:
-    first_appeared_currency: Final = InternationalCurrency.usd
-    second_appeared_currency: Final = InternationalCurrency.eur
+    first_appeared_currency: InternationalCurrency
+    second_appeared_currency: InternationalCurrency
+
+    async def get_online_exchange_rate(self):
+        ...
+
+    async def get_cash_exchange_rate(self):
+        ...
 
     @staticmethod
-    async def set_two_first_appeared(
-            unordered_list: list[ExchangeRate],
+    async def set_first_appeared_currencies(
+            unordered_list: list[Any],
             first_appeared_currency: str,
             second_appeared_currency: str
-    ) -> list[ExchangeRate]:
+    ) -> list[Any] | None:
 
         for index_rate in range(len(unordered_list) - 1):
 
@@ -28,6 +34,7 @@ class Service:
                 )
 
             return unordered_list
+        return None
 
     @staticmethod
     async def execute_tasks(list_of_tasks: list) -> list:
@@ -40,3 +47,4 @@ class Service:
         list_of_processed_tasks = [element for element in results if element is not None]
 
         return list_of_processed_tasks
+

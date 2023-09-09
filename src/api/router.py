@@ -6,12 +6,12 @@ from starlette import status
 from starlette.requests import Request
 from starlette.responses import Response
 
-from core.service import Service
-from services.avalbank_service import AvalBankService
-from services.centralbank_service import CentralBankService
-from services.monobank_service import MonoBankService
-from services.privatebank_service import PrivatBankService
-from utils.exceptions import TooManyRequests
+from src.core.service import Service
+from src.services.avalbank_service import AvalBankService
+from src.services.centralbank_service import CentralBankService
+from src.services.monobank_service import MonoBankService
+from src.services.privatebank_service import PrivatBankService
+from src.utils.exceptions import TooManyRequests
 from .docs import get_exchange_rate_doc
 from .schemas import BankExchangeRate
 

@@ -1,7 +1,6 @@
 from pydantic import BaseModel
-from starlette import status
 
-from api.schemas import ExchangeRate
+from src.api.schemas import ExchangeRate
 
 
 class HTTPException429(BaseModel):
@@ -23,14 +22,14 @@ class HTTPException500(BaseModel):
 
 
 get_exchange_rate_doc = {
-    status.HTTP_200_OK: {
+    200: {
         "model": list[dict[str, list[ExchangeRate]]]
     },
-    status.HTTP_429_TOO_MANY_REQUESTS: {
+    429: {
         "model": HTTPException429,
         "description": "Too many requests",
     },
-    status.HTTP_500_INTERNAL_SERVER_ERROR: {
+    500: {
         "model": HTTPException500,
         "description": "Internal Server Error"
     }
