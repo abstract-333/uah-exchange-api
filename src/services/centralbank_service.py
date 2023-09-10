@@ -13,8 +13,6 @@ class CentralBankService(Service):
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)
 
-    first_appeared_currency = InternationalCurrency.usd
-    second_appeared_currency = InternationalCurrency.eur
     async def get_online_exchange_rate(self) -> BankExchangeRate | None:
         """Get online exchange rate in Central Bank of Ukraine (NBU)"""
         status_code, response = await self.request_repo.get_request_json(url=self.url_online)

@@ -1,6 +1,5 @@
 from typing import Final, List
 
-
 from src.api.schemas import ExchangeRate, BankExchangeRate, InternationalCurrency
 from src.core.repository import Repository
 from src.core.urls import PRIVAT_BANK_ONLINE_URL, PRIVAT_BANK_CASH_URL
@@ -14,9 +13,6 @@ class PrivatBankService(Service):
     url_cash: Final = PRIVAT_BANK_CASH_URL
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)
-
-    first_appeared_currency=  InternationalCurrency.usd
-    second_appeared_currency= InternationalCurrency.eur
 
     async def get_online_exchange_rate(self) -> BankExchangeRate | None:
         """Get online exchange rate in PrivatBank"""
@@ -52,7 +48,6 @@ class PrivatBankService(Service):
         )
         await self.redis_repo.store_value(keys=returned_rate_bank.model_dump(), name_prefix=exchange_type)
         return returned_rate_bank
-
 
     @staticmethod
     async def _convert_dict_to_list(entered_list: List) -> list[ExchangeRate]:

@@ -1,21 +1,20 @@
 from typing import Final
-
 from bs4 import BeautifulSoup
+
 from src.api.schemas import ExchangeRate, NationalCurrency, BankExchangeRate, InternationalCurrency
 from src.core.repository import Repository
 from src.core.service import Service
-from src.core.urls import AVAL_BANK_ONLINE_CASH_URL
+from src.core.urls import AVAL_BANK_CASH_URL, AVAL_BANK_ONLINE_URL
 from src.redis_manager.repository import RedisRepository
+from src.utils.async_tasks import execute_tasks
 
 
 class AvalBankService(Service):
     bank_name: Final[str] = "AvalBank"
-    url_online: Final[str] = AVAL_BANK_ONLINE_CASH_URL
+    url_cash: Final[str] = AVAL_BANK_CASH_URL
+    url_online: Final[str] = AVAL_BANK_ONLINE_URL
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)
-
-    first_appeared_currency = InternationalCurrency.usd
-    second_appeared_currency = InternationalCurrency.eur
 
     async def get_cash_exchange_rate(self) -> BankExchangeRate | None:
         """Get online exchange rate in Aval Bank"""
@@ -26,7 +25,7 @@ class AvalBankService(Service):
             self._parse_cash_exchange_rate(currency_target=self.second_appeared_currency),
         ]
 
-        executed_tasks = await self.execute_tasks(tasks)
+        executed_tasks = await execute_tasks(tasks)
 
         if not executed_tasks:
             cached_exchange_rate = await self.redis_repo.get_stored_data()
@@ -43,7 +42,7 @@ class AvalBankService(Service):
 
     async def _parse_cash_exchange_rate(self, currency_target: InternationalCurrency) -> ExchangeRate | None:
         """Get exchange rate for currency variable by parsing html web page"""
-        status_code, page = await self.request_repo.get_request_text(url=self.url_online + currency_target)
+        status_code, page = await self.request_repo.get_request_text(url=self.url_cash + currency_target)
 
         # Return None if response is not success (not 200 status code)
         if status_code != 200:
@@ -61,4 +60,23 @@ class AvalBankService(Service):
                     buy=rates[index_bank + 1].text,
                     sell=rates[index_bank + 2].text
                 )
+        return None
+
+    async def parse_online_exchange_rate(self) -> ExchangeRate | None:
+        """TESTINNNG !!!!"""
+        status_code, page = await self.request_repo.get_request_text(url=self.url_online)
+
+        soup = BeautifulSoup(page, 'lxml')
+
+        rates = soup.find_all("span", class_="heading-block-currency-rate__table-txt body-regular")[9].text
+        print(rates)
+        # for rate in rates:
+        #     if rate.text == "Райффайзен Банк Аваль":
+        #         index_bank = rates.index(rate)
+        #         return ExchangeRate(
+        #             first_currency=currency_target,
+        #             second_currency=NationalCurrency.uah,
+        #             buy=rates[index_bank + 1].text,
+        #             sell=rates[index_bank + 2].text
+        #         )
         return None

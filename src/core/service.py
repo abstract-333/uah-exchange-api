@@ -1,12 +1,12 @@
 import asyncio
-from typing import Any
+from typing import Any, Final
 
-from src.api.schemas import InternationalCurrency, BankExchangeRate
+from src.api.schemas import InternationalCurrency
 
 
 class Service:
-    first_appeared_currency: InternationalCurrency
-    second_appeared_currency: InternationalCurrency
+    first_appeared_currency: Final[InternationalCurrency] = InternationalCurrency.usd
+    second_appeared_currency: Final[InternationalCurrency] = InternationalCurrency.eur
 
     async def get_online_exchange_rate(self):
         ...
@@ -36,15 +36,5 @@ class Service:
             return unordered_list
         return None
 
-    @staticmethod
-    async def execute_tasks(list_of_tasks: list) -> list:
-        """Execute tasks asynchronously to get the best performance and return list of result"""
 
-        # Run the tasks concurrently
-        results = await asyncio.gather(*list_of_tasks, return_exceptions=True)
-
-        # Add all values that are not None
-        list_of_processed_tasks = [element for element in results if element is not None]
-
-        return list_of_processed_tasks
 
