@@ -5,6 +5,8 @@ from starlette import status
 from starlette.requests import Request
 from starlette.responses import Response
 
+from services.avalbank_service import AvalBankService
+from src.services.oschadbank_service import OschadBankService
 from src.core.dependencies import AllBanksServices
 from src.utils.exceptions import TooManyRequests
 from .docs import get_exchange_rate_doc
@@ -55,11 +57,11 @@ async def get_cash_exchange_rate(
 ):
     try:
         start_time = time.time()
-
         list_of_rates = await banks_service.get_cash_exchange_rate()
 
         print(time.time() - start_time)
         return list_of_rates
+
     except TooManyRequests:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,

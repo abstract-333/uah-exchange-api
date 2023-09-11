@@ -1,6 +1,6 @@
 from typing import Final, List
 
-from src.api.schemas import ExchangeRate, BankExchangeRate, InternationalCurrency
+from src.api.schemas import ExchangeRate, BankExchangeRate
 from src.core.repository import Repository
 from src.core.urls import PRIVAT_BANK_ONLINE_URL, PRIVAT_BANK_CASH_URL
 from src.core.service import Service
@@ -27,7 +27,7 @@ class PrivatBankService(Service):
 
         if status_code != 200:
             # If there is no date available form server, use cache
-            cached_exchange_rate = await self.redis_repo.get_stored_data()
+            cached_exchange_rate = await self.redis_repo.get_stored_data(name_prefix=exchange_type)
             return BankExchangeRate(**cached_exchange_rate)
 
         rates_list: list = await self._convert_dict_to_list(response)

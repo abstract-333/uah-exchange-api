@@ -1,3 +1,6 @@
+from services.pumb_bank_service import PumbBankService
+from src.services.universlbank_service import UniversalBankService
+from src.services.oschadbank_service import OschadBankService
 from src.api.schemas import BankExchangeRate
 from src.core.service import Service
 from src.services.avalbank_service import AvalBankService
@@ -12,7 +15,10 @@ class BanksService(Service):
         AvalBankService(),
         CentralBankService(),
         MonoBankService(),
+        OschadBankService(),
         PrivatBankService(),
+        PumbBankService(),
+        UniversalBankService()
     ]
 
     async def get_cash_exchange_rate(self) -> list[BankExchangeRate]:

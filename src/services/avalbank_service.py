@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from src.api.schemas import ExchangeRate, NationalCurrency, BankExchangeRate, InternationalCurrency
 from src.core.repository import Repository
 from src.core.service import Service
-from src.core.urls import AVAL_BANK_CASH_URL, AVAL_BANK_ONLINE_URL
+from src.core.urls import AVAL_BANK_CASH_URL, AVAL_BANK_ONLINE_URL, OSCHAD_BANK_ONLINE_CASH_URL
 from src.redis_manager.repository import RedisRepository
 from src.utils.async_tasks import execute_tasks
 
@@ -12,7 +12,7 @@ from src.utils.async_tasks import execute_tasks
 class AvalBankService(Service):
     bank_name: Final[str] = "AvalBank"
     url_cash: Final[str] = AVAL_BANK_CASH_URL
-    url_online: Final[str] = AVAL_BANK_ONLINE_URL
+    url_online: Final[str] = OSCHAD_BANK_ONLINE_CASH_URL
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)
 
@@ -67,9 +67,9 @@ class AvalBankService(Service):
         status_code, page = await self.request_repo.get_request_text(url=self.url_online)
 
         soup = BeautifulSoup(page, 'lxml')
-
-        rates = soup.find_all("span", class_="heading-block-currency-rate__table-txt body-regular")[9].text
-        print(rates)
+        print(soup)
+        rates = soup.find_all("span", class_="item-total")[36]
+        print(rates.text)
         # for rate in rates:
         #     if rate.text == "Райффайзен Банк Аваль":
         #         index_bank = rates.index(rate)
