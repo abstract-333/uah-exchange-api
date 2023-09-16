@@ -7,13 +7,10 @@ from starlette.responses import Response
 from src.services.pumb_bank_service import PumbBankService
 from src.services.universlbank_service import UniversalBankService
 from src.services.oschadbank_service import OschadBankService
-from src.api.schemas import BankExchangeRate
-from src.core.service import Service
 from src.services.avalbank_service import AvalBankService
 from src.services.centralbank_service import CentralBankService
 from src.services.monobank_service import MonoBankService
 from src.services.privatebank_service import PrivatBankService
-from src.utils.async_tasks import execute_tasks
 
 from src.core.dependencies import AllBanksServices
 from src.utils.exceptions import TooManyRequests
@@ -28,6 +25,7 @@ online_rate_router = APIRouter(
 
 @online_rate_router.get(
     path='/online/all',
+    name='Get online exchange rate for all banks',
     response_model=list[BankExchangeRate | None],
     responses=get_exchange_rate_all_banks_doc,
 )
@@ -54,6 +52,7 @@ async def get_online_exchange_rate(
 
 @online_rate_router.get(
     path='/cash/all',
+    name='Get cash exchange rate for all banks',
     response_model=list[BankExchangeRate | None],
     responses=get_exchange_rate_all_banks_doc,
 )
@@ -79,6 +78,7 @@ async def get_cash_exchange_rate(
 
 @online_rate_router.get(
     path="/online/",
+    name='Get online exchange rate for requested bank',
     response_model=BankExchangeRate | None,
     responses=get_exchange_rate_bank_doc,
 )
@@ -93,7 +93,6 @@ async def get_online_exchange_rate(
         print(time.time() - start_time)
         bank_service = eval(bank_requested + "Service")
         return await bank_service().get_online_exchange_rate()
-        # return list_of_rates
 
     except TooManyRequests:
         raise HTTPException(
@@ -104,6 +103,7 @@ async def get_online_exchange_rate(
 
 @online_rate_router.get(
     path="/cash/",
+    name='Get cash exchange rate for requested bank',
     response_model=BankExchangeRate | None,
     responses=get_exchange_rate_bank_doc,
 )
@@ -118,7 +118,6 @@ async def get_online_exchange_rate(
         print(time.time() - start_time)
         bank_service = eval(bank_requested + "Service")
         return await bank_service().get_cash_exchange_rate()
-        # return list_of_rates
 
     except TooManyRequests:
         raise HTTPException(
