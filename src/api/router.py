@@ -17,7 +17,7 @@ from src.utils.async_tasks import execute_tasks
 
 from src.core.dependencies import AllBanksServices
 from src.utils.exceptions import TooManyRequests
-from .docs import get_exchange_rate_doc
+from .docs import get_exchange_rate_all_banks_doc, get_exchange_rate_bank_doc
 from .schemas import BankExchangeRate, BanksAvailable
 
 online_rate_router = APIRouter(
@@ -29,7 +29,7 @@ online_rate_router = APIRouter(
 @online_rate_router.get(
     path='/online/all',
     response_model=list[BankExchangeRate | None],
-    responses=get_exchange_rate_doc,
+    responses=get_exchange_rate_all_banks_doc,
 )
 # @cache(expire=60 * 2)  # 2 minutes
 async def get_online_exchange_rate(
@@ -55,7 +55,7 @@ async def get_online_exchange_rate(
 @online_rate_router.get(
     path='/cash/all',
     response_model=list[BankExchangeRate | None],
-    responses=get_exchange_rate_doc,
+    responses=get_exchange_rate_all_banks_doc,
 )
 # @cache(expire=60 * 2)  # 2 minutes
 async def get_cash_exchange_rate(
@@ -78,11 +78,10 @@ async def get_cash_exchange_rate(
 
 
 @online_rate_router.get(
-    path="/online/bank/",
+    path="/online/",
     response_model=BankExchangeRate | None,
-    # responses=get_exchange_rate_doc,
+    responses=get_exchange_rate_bank_doc,
 )
-# @cache(expire=60 * 2)  # 2 minutes
 async def get_online_exchange_rate(
         request: Request,
         response: Response,
@@ -104,11 +103,10 @@ async def get_online_exchange_rate(
 
 
 @online_rate_router.get(
-    path="/cash/bank/",
+    path="/cash/",
     response_model=BankExchangeRate | None,
-    # responses=get_exchange_rate_doc,
+    responses=get_exchange_rate_bank_doc,
 )
-# @cache(expire=60 * 2)  # 2 minutes
 async def get_online_exchange_rate(
         request: Request,
         response: Response,

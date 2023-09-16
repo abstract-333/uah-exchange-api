@@ -21,9 +21,24 @@ class HTTPException500(BaseModel):
         }
 
 
-get_exchange_rate_doc = {
+get_exchange_rate_all_banks_doc = {
     200: {
         "model": list[dict[str, list[ExchangeRate]]]
+    },
+    429: {
+        "model": HTTPException429,
+        "description": "Too many requests",
+    },
+    500: {
+        "model": HTTPException500,
+        "description": "Internal Server Error"
+    }
+}
+
+
+get_exchange_rate_bank_doc = {
+    200: {
+        "model": dict[str, list[ExchangeRate]]
     },
     429: {
         "model": HTTPException429,
