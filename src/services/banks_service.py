@@ -1,4 +1,4 @@
-from services.pumb_bank_service import PumbBankService
+from src.services.pumb_bank_service import PumbBankService
 from src.services.universlbank_service import UniversalBankService
 from src.services.oschadbank_service import OschadBankService
 from src.api.schemas import BankExchangeRate
@@ -11,6 +11,7 @@ from src.utils.async_tasks import execute_tasks
 
 
 class BanksService(Service):
+
     banks_list: list[Service] = [
         AvalBankService(),
         CentralBankService(),

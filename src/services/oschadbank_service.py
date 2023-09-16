@@ -16,23 +16,8 @@ class OschadBankService(Service):
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)
 
-    # async def get_online_exchange_rate(self) -> BankExchangeRate | None:
-    #     status_code, page = await self.request_repo.get_request_text(url=self.url_cash_online)
-    #
-    #     if status_code != 200:
-    #         # If there is no date available form server, use cache
-    #         cached_exchange_rate = await self.redis_repo.get_stored_data(name_prefix='online')
-    #         return BankExchangeRate(**cached_exchange_rate)
-    #
-    #     returned_rate_bank = await self._get_cash_online_parsing(page, cash_rate=False)
-    #
-    #     await self.redis_repo.store_value(keys=returned_rate_bank.model_dump(), name_prefix='online')
-    #
-    #     return returned_rate_bank
-
     async def get_cash_exchange_rate(self) -> BankExchangeRate | None:
         status_code, page = await self.request_repo.get_request_text(url=self.url_cash)
-        print(status_code)
         if status_code != 200:
             # If there is no date available form server, use cache
             cached_exchange_rate = await self.redis_repo.get_stored_data()
@@ -61,10 +46,9 @@ class OschadBankService(Service):
             exchange_rate = ExchangeRate(
                 first_currency=current_currency,
                 second_currency=NationalCurrency.uah,
-                buy=str.strip(rates_buy[index_base + iteration].text),
-                sell=str.strip(rates_sell[index_base  + iteration].text)
+                buy=str.strip(rates_buy[index_base + iteration].text),  # type: ignore
+                sell=str.strip(rates_sell[index_base + iteration].text)  # type: ignore
             )
-            print(exchange_rate)
             list_of_rates.append(exchange_rate)
         returned_rate_bank = BankExchangeRate(
             bank_name=self.bank_name,

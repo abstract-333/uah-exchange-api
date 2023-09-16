@@ -1,3 +1,4 @@
+from lxml import html
 from typing import Final
 from bs4 import BeautifulSoup
 
@@ -65,11 +66,22 @@ class AvalBankService(Service):
     async def parse_online_exchange_rate(self) -> ExchangeRate | None:
         """TESTINNNG !!!!"""
         status_code, page = await self.request_repo.get_request_text(url=self.url_online)
+        tree = html.fromstring(page)
 
-        soup = BeautifulSoup(page, 'lxml')
-        print(soup)
-        rates = soup.find_all("span", class_="item-total")[36]
-        print(rates.text)
+        # Extract the exchange rates using XPath expressions
+        currency_elements = tree.xpath("//table[@class='currency-table']/tbody/tr")
+        exchange_rates = []
+        print(currency_elements)
+        for element in currency_elements:
+            currency_name = element.xpath("./td[1]//text()")[0]
+            buy_rate = element.xpath("./td[2]//text()")[0]
+            sell_rate = element.xpath("./td[3]//text()")[0]
+            exchange_rates.append({
+                "currency": currency_name,
+                "buy_rate": buy_rate,
+                "sell_rate": sell_rate
+            })
+            print(exchange_rates)
         # for rate in rates:
         #     if rate.text == "Райффайзен Банк Аваль":
         #         index_bank = rates.index(rate)

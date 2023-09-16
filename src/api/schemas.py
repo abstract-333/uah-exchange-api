@@ -5,6 +5,16 @@ from typing import Final
 from pydantic import BaseModel, Field
 
 
+class BanksAvailable(str, Enum):
+    aval_bank = 'AvalBank'
+    central_bank = 'CentralBank'
+    mono_bank = 'MonoBank'
+    oschad_bank = 'OschadBank'
+    privat_bank = 'PrivatBank'
+    pumb_bank = 'PumbBank'
+    universal_bank = 'UniversalBank'
+
+
 class InternationalCurrency(str, Enum):
     usd: Final = 'USD'
     eur: Final = 'EUR'

@@ -1,6 +1,6 @@
 import uvicorn
 
-from settings import settings
+from src.settings import settings
 
 if __name__ == "__main__":
     uvicorn.run(
@@ -8,5 +8,5 @@ if __name__ == "__main__":
         log_level="info",
         host=settings.server_host,
         port=settings.server_port,
-        reload=True
+        reload=True,
     )
