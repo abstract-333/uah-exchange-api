@@ -8,7 +8,7 @@ from redis import asyncio as aioredis, Redis
 from redis.client import Redis
 from starlette import status
 
-from src.config import REDIS_SECRET_KEY
+from redis_manager.redis_config import get_redis_config
 from src.routers import all_routers
 
 # Adding sentry to save logs and exception in server
@@ -44,11 +44,7 @@ async def validation_exception_handler(request, err):
 @app.on_event("startup")
 async def startup_event():
     # redis_manager: Redis
-    redis: Final[Redis] = await aioredis.from_url(
-        url=f"rediss://red-cjo66k358phs738s90fg:{REDIS_SECRET_KEY}@frankfurt-redis.render.com:6379",
-        encoding="utf8",
-        decode_responses=True
-    )
+    redis: Final[Redis] = await get_redis_config()
     FastAPICache.init(backend=RedisBackend(redis), prefix="fastapi-cache")
 
 
