@@ -1,6 +1,5 @@
 from typing import Final
 import sentry_sdk
-from arel import HotReloadMiddleware
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from fastapi_cache import FastAPICache
@@ -25,7 +24,7 @@ app = FastAPI(
 )
 
 # Adding hot reload middleware to make swagger ui changing dynamically
-app.add_middleware(HotReloadMiddleware)
+# app.add_middleware(HotReloadMiddleware)
 
 
 @app.exception_handler(Exception)

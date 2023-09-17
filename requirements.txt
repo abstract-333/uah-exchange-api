@@ -12,3 +12,4 @@ httpx
 token-throttler
 beautifulsoup4
 lxml
+sentry-sdk[fastapi]
