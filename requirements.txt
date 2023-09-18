@@ -1,4 +1,5 @@
 pip
+trio
 setuptools
 sqlalchemy
 pytest

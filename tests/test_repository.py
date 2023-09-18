@@ -1,7 +1,4 @@
-from typing import Any
-
 import pytest
-
 from src.core.repository import Repository
 from src.core.urls import (
     CENTRAL_BANK_ONLINE_URL,
@@ -14,9 +11,7 @@ from src.core.urls import (
 )
 
 
-@pytest.mark.anyio
 class TestRepository:
-
     @pytest.mark.parametrize(
         "url, status_code",
         [
@@ -25,17 +20,11 @@ class TestRepository:
             (PRIVAT_BANK_CASH_URL, 200),
             (PRIVAT_BANK_ONLINE_URL, 200),
             (UNIVERSAL_BANK_URL, 200),
-        ]
-    )
-    async def test_get_request_json(self, url, status_code):
-        assert (await Repository.get_request(url))[0] == status_code
-
-    @pytest.mark.parametrize(
-        "url, status_code",
-        [
-            (AVAL_BANK_CASH_URL, 200),
+            (AVAL_BANK_CASH_URL + "USD", 200),
+            (AVAL_BANK_CASH_URL + "EUR", 200),
             (PUMB_BANK_URL, 200),
         ]
     )
-    async def test_get_request_text(self, url, status_code):
+    @pytest.mark.anyio
+    async def test_get_request_success(self, url, status_code):
         assert (await Repository.get_request(url))[0] == status_code
