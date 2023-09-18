@@ -23,8 +23,10 @@ class TestRepository:
             (AVAL_BANK_CASH_URL + "USD", 200),
             (AVAL_BANK_CASH_URL + "EUR", 200),
             (PUMB_BANK_URL, 200),
+            ("NOT_URL", 503),
         ]
     )
     @pytest.mark.anyio
     async def test_get_request_success(self, url, status_code):
         assert (await Repository.get_request(url))[0] == status_code
+
