@@ -1,29 +1,28 @@
 from typing import Final
 
 from bs4 import BeautifulSoup
-
+from src.core.urls import UNIVERSAL_BANK_URL
 from src.api.schemas import ExchangeRate, NationalCurrency, BankExchangeRate, InternationalCurrency
 from src.core.repository import Repository
 from src.core.service import Service
-from src.core.urls import UNIVERSAL_BANK_CASH_URL
 from src.redis_manager.repository import RedisRepository
 
 
 class UniversalBankService(Service):
     bank_name: Final[str] = "UniversalBank"
-    url_cash_online: Final[str] = UNIVERSAL_BANK_CASH_URL
+    url_cash_online: Final[str] = UNIVERSAL_BANK_URL
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)
 
     async def get_cash_exchange_rate(self) -> BankExchangeRate | None:
-        status_code, page = await self.request_repo.get_request_text(url=self.url_cash_online)
+        status_code, page = await self.request_repo.get_request(url=self.url_cash_online)
 
         if status_code != 200:
             # If there is no date available form server, use cache
             cached_exchange_rate = await self.redis_repo.get_stored_data()
             return BankExchangeRate(**cached_exchange_rate)
 
-        returned_rate_bank = await self._get_cash_online_parsing(page)
+        returned_rate_bank = await self._get_cash_online_parsing(page.text)
 
         await self.redis_repo.store_value(keys=returned_rate_bank.model_dump())
         return returned_rate_bank

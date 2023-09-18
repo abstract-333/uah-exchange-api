@@ -23,14 +23,14 @@ class PrivatBankService(Service):
         return await self._get_exchange_rate(self.url_cash, exchange_type='cash')
 
     async def _get_exchange_rate(self, cash_or_online_url: str, exchange_type: str):
-        status_code, response = await self.request_repo.get_request_json(url=cash_or_online_url)
+        status_code, response = await self.request_repo.get_request(url=cash_or_online_url)
 
         if status_code != 200:
             # If there is no date available form server, use cache
             cached_exchange_rate = await self.redis_repo.get_stored_data(name_prefix=exchange_type)
             return BankExchangeRate(**cached_exchange_rate)
 
-        rates_list: list = await self._convert_dict_to_list(response)
+        rates_list: list = await self._convert_dict_to_list(response.json())
 
         ordered_rates_list: list[ExchangeRate] | None = await self.set_first_appeared_currencies(
             unordered_list=rates_list,

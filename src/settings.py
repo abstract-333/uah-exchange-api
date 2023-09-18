@@ -11,7 +11,6 @@ class Settings(BaseSettings):
     redis_directory: str = ''
     redis_secret_key: str
 
-    mode: str
 
     @property
     def redis_url(self):

@@ -1,6 +1,7 @@
 pip
 setuptools
 sqlalchemy
+pytest
 alembic
 python-dotenv
 gunicorn

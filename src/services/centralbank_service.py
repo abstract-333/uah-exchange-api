@@ -15,7 +15,7 @@ class CentralBankService(Service):
 
     async def get_online_exchange_rate(self) -> BankExchangeRate | None:
         """Get online exchange rate in Central Bank of Ukraine (NBU)"""
-        status_code, response = await self.request_repo.get_request_json(url=self.url_online)
+        status_code, response = await self.request_repo.get_request(url=self.url_online)
 
         if status_code != 200:
             # If there is no date available form server, use cache
@@ -23,7 +23,7 @@ class CentralBankService(Service):
             return BankExchangeRate(**cached_exchange_rate)
 
         exchange_rate_list = []
-        for row in response:
+        for row in response.json():
             if row["cc"] in (InternationalCurrency.usd, InternationalCurrency.eur):
                 exchange_rate_row = ExchangeRate(
                     first_currency=row["cc"],

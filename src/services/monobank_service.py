@@ -15,14 +15,14 @@ class MonoBankService(Service):
 
     async def get_online_exchange_rate(self) -> BankExchangeRate | None:
         """Get online exchange rate in MonoBank"""
-        status_code, response = await self.request_repo.get_request_json(url=self.url_online)
+        status_code, response = await self.request_repo.get_request(url=self.url_online)
 
         if status_code != 200:
             # If there is no date available form server, use cache
             cached_exchange_rate = await self.redis_repo.get_stored_data()
             return BankExchangeRate(**cached_exchange_rate)
 
-        euro_dollar_response = response[:2]
+        euro_dollar_response = response.json()[:2]
         exchange_rate_list = [
             ExchangeRate(
                 first_currency=InternationalCurrency.usd if row["currencyCodeA"] == 840 else InternationalCurrency.eur,
