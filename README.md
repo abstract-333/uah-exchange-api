@@ -1,5 +1,5 @@
 # UAHExchangeAPI
-FastAPI backend to UAH get exchange rate in ukrainian banks,
+FastAPI backend to get UAH exchange rate in ukrainian banks,
 such as cash or online rate.
 <br />
 ## How to run
