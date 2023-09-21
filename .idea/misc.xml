@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="Black">
+    <option name="enabledOnReformat" value="true" />
+    <option name="enabledOnSave" value="true" />
+    <option name="sdkUUID" value="5c88772e-d323-4d9a-acc8-4f14a3cd1410" />
+  </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.11 (UAHExchangeAPI)" project-jdk-type="Python SDK" />
 </project>
