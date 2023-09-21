@@ -6,18 +6,18 @@ from pydantic import BaseModel, Field
 
 
 class BanksAvailable(str, Enum):
-    aval_bank = 'AvalBank'
-    central_bank = 'CentralBank'
-    mono_bank = 'MonoBank'
-    oschad_bank = 'OschadBank'
-    privat_bank = 'PrivatBank'
-    pumb_bank = 'PumbBank'
-    universal_bank = 'UniversalBank'
+    aval_bank = "AvalBank"
+    central_bank = "CentralBank"
+    mono_bank = "MonoBank"
+    oschad_bank = "OschadBank"
+    privat_bank = "PrivatBank"
+    pumb_bank = "PumbBank"
+    universal_bank = "UniversalBank"
 
 
 class InternationalCurrency(str, Enum):
-    usd: Final = 'USD'
-    eur: Final = 'EUR'
+    usd: Final = "USD"
+    eur: Final = "EUR"
 
 
 class NationalCurrency(str, Enum):
@@ -25,8 +25,12 @@ class NationalCurrency(str, Enum):
 
 
 class ExchangeRate(BaseModel):
-    first_currency: InternationalCurrency = Field(max_length=3, min_length=3, examples=["USD", "EUR"])
-    second_currency: NationalCurrency = Field(max_length=3, min_length=3, examples=["UAH"])
+    first_currency: InternationalCurrency = Field(
+        max_length=3, min_length=3, examples=["USD", "EUR"]
+    )
+    second_currency: NationalCurrency = Field(
+        max_length=3, min_length=3, examples=["UAH"]
+    )
     date: str = Field(description="Unix time from 1970", default=str(int(time.time())))
     buy: float = Field(ge=0, examples=[37.75])
     sell: float = Field(ge=0, examples=[38.75])
@@ -34,4 +38,4 @@ class ExchangeRate(BaseModel):
 
 class BankExchangeRate(BaseModel):
     bank_name: str = Field(examples=["PrivatBank", "MonoBank"])
-    rates: list[ExchangeRate]
+    rates: list[ExchangeRate] | None

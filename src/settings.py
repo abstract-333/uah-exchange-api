@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     server_host: str = "0.0.0.0"
     server_port: int = 8000
 
-    redis_host: str = "0.0.0.0"
+    redis_host: str = "localhost"
     redis_port: str = "6379"
     redis_directory: str = ""
     redis_secret_key: str

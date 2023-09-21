@@ -16,37 +16,49 @@ class PrivatBankService(Service):
 
     async def get_online_exchange_rate(self) -> BankExchangeRate | None:
         """Get online exchange rate in PrivatBank"""
-        return await self._get_exchange_rate(self.url_online, exchange_type='online')
+        return await self._get_exchange_rate(self.url_online, exchange_type="online")
 
     async def get_cash_exchange_rate(self) -> BankExchangeRate | None:
         """Get cash exchange rate in PrivatBank"""
-        return await self._get_exchange_rate(self.url_cash, exchange_type='cash')
+        return await self._get_exchange_rate(self.url_cash, exchange_type="cash")
 
     async def _get_exchange_rate(self, cash_or_online_url: str, exchange_type: str):
-        status_code, response = await self.request_repo.get_request(url=cash_or_online_url)
+        status_code, response = await self.request_repo.get_request(
+            url=cash_or_online_url
+        )
 
         if status_code != 200:
             # If there is no date available form server, use cache
-            cached_exchange_rate = await self.redis_repo.get_stored_data(name_prefix=exchange_type)
+            cached_exchange_rate = await self.redis_repo.get_stored_data(
+                name_prefix=exchange_type
+            )
+            if cached_exchange_rate is None:
+                return BankExchangeRate(bank_name=self.bank_name, rates=None)
+
             return BankExchangeRate(**cached_exchange_rate)
 
         rates_list: list = await self._convert_dict_to_list(response.json())
 
-        ordered_rates_list: list[ExchangeRate] | None = await self.set_first_appeared_currencies(
+        ordered_rates_list: list[
+            ExchangeRate
+        ] | None = await self.set_first_appeared_currencies(
             unordered_list=rates_list,
             first_appeared_currency=self.first_appeared_currency,
-            second_appeared_currency=self.second_appeared_currency
+            second_appeared_currency=self.second_appeared_currency,
         )
 
         if ordered_rates_list is None:
-            cached_exchange_rate = await self.redis_repo.get_stored_data(name_prefix=exchange_type)
+            cached_exchange_rate = await self.redis_repo.get_stored_data(
+                name_prefix=exchange_type
+            )
             return BankExchangeRate(**cached_exchange_rate)
 
         returned_rate_bank = BankExchangeRate(
-            bank_name=self.bank_name,
-            rates=ordered_rates_list
+            bank_name=self.bank_name, rates=ordered_rates_list
         )
-        await self.redis_repo.store_value(keys=returned_rate_bank.model_dump(), name_prefix=exchange_type)
+        await self.redis_repo.store_value(
+            keys=returned_rate_bank.model_dump(), name_prefix=exchange_type
+        )
         return returned_rate_bank
 
     @staticmethod
@@ -56,7 +68,7 @@ class PrivatBankService(Service):
                 first_currency=row["ccy"],
                 second_currency=row["base_ccy"],
                 buy=row["buy"],
-                sell=row["sale"]
+                sell=row["sale"],
             )
             for row in entered_list
         ]

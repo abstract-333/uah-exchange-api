@@ -21,6 +21,10 @@ class OschadBankService(Service):
         if status_code != 200:
             # If there is no date available form server, use cache
             cached_exchange_rate = await self.redis_repo.get_stored_data()
+
+            if cached_exchange_rate is None:
+                return BankExchangeRate(bank_name=self.bank_name, rates=None)
+
             return BankExchangeRate(**cached_exchange_rate)
 
         returned_rate_bank = await self._get_exchange_rate_parsing(page.text)
@@ -29,15 +33,13 @@ class OschadBankService(Service):
         return returned_rate_bank
 
     async def _get_exchange_rate_parsing(self, page) -> BankExchangeRate:
-
         index_base = 36
 
-        soup = BeautifulSoup(page, 'lxml')
+        soup = BeautifulSoup(page, "lxml")
         rates_buy = soup.find_all("span", class_="item-rate")
         rates_sell = soup.find_all("span", class_="item-total")
         list_of_rates = []
         for iteration in range(2):
-
             current_currency: InternationalCurrency = InternationalCurrency.usd
 
             if iteration == 1:
@@ -47,11 +49,10 @@ class OschadBankService(Service):
                 first_currency=current_currency,
                 second_currency=NationalCurrency.uah,
                 buy=str.strip(rates_buy[index_base + iteration].text),  # type: ignore
-                sell=str.strip(rates_sell[index_base + iteration].text)  # type: ignore
+                sell=str.strip(rates_sell[index_base + iteration].text),  # type: ignore
             )
             list_of_rates.append(exchange_rate)
         returned_rate_bank = BankExchangeRate(
-            bank_name=self.bank_name,
-            rates=list_of_rates
+            bank_name=self.bank_name, rates=list_of_rates
         )
         return returned_rate_bank
