@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     redis_directory: str = ""
     redis_secret_key: str
 
+    sentry_api_key: str
+
     @property
     def redis_url(self):
         return f"redis://{self.redis_host}:{self.redis_port}/{self.redis_directory}"
