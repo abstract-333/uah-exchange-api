@@ -1,9 +1,9 @@
 from typing import Final, List
 
-from src.api.schemas import ExchangeRate, BankExchangeRate
+from src.api.schemas import ExchangeRate, BankExchangeRate, InternationalCurrency
 from src.core.repository import Repository
 from src.core.urls import PRIVAT_BANK_ONLINE_URL, PRIVAT_BANK_CASH_URL
-from src.core.service import Service
+from src.core.service import Service, set_first_appeared_currencies
 from src.redis_manager.repository import RedisRepository
 
 
@@ -13,6 +13,8 @@ class PrivatBankService(Service):
     url_cash: Final = PRIVAT_BANK_CASH_URL
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)
+    first_appeared_currency = InternationalCurrency.usd
+    second_appeared_currency = InternationalCurrency.eur
 
     async def get_online_exchange_rate(self) -> BankExchangeRate | None:
         """Get online exchange rate in PrivatBank"""
@@ -41,7 +43,7 @@ class PrivatBankService(Service):
 
         ordered_rates_list: list[
             ExchangeRate
-        ] | None = await self.set_first_appeared_currencies(
+        ] | None = await set_first_appeared_currencies(
             unordered_list=rates_list,
             first_appeared_currency=self.first_appeared_currency,
             second_appeared_currency=self.second_appeared_currency,
@@ -51,6 +53,10 @@ class PrivatBankService(Service):
             cached_exchange_rate = await self.redis_repo.get_stored_data(
                 name_prefix=exchange_type
             )
+
+            if cached_exchange_rate is None:
+                return BankExchangeRate(bank_name=self.bank_name, rates=None)
+
             return BankExchangeRate(**cached_exchange_rate)
 
         returned_rate_bank = BankExchangeRate(

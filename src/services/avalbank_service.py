@@ -20,6 +20,8 @@ class AvalBankService(Service):
     url_online: Final[str] = OSCHAD_BANK_URL
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)
+    first_appeared_currency = InternationalCurrency.usd
+    second_appeared_currency = InternationalCurrency.eur
 
     async def get_cash_exchange_rate(self) -> BankExchangeRate | None:
         """Get online exchange rate in Aval Bank"""

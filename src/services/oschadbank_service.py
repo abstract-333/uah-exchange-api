@@ -2,7 +2,7 @@ from typing import Final
 
 from bs4 import BeautifulSoup
 
-from api.schemas import InternationalCurrency
+from src.api.schemas import InternationalCurrency
 from src.api.schemas import BankExchangeRate, ExchangeRate, NationalCurrency
 from src.core.repository import Repository
 from src.core.service import Service
@@ -15,6 +15,8 @@ class OschadBankService(Service):
     url_cash: Final[str] = OSCHAD_BANK_URL
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)
+    first_appeared_currency = InternationalCurrency.usd
+    second_appeared_currency = InternationalCurrency.eur
 
     async def get_cash_exchange_rate(self) -> BankExchangeRate | None:
         status_code, page = await self.request_repo.get_request(url=self.url_cash)

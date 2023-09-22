@@ -19,7 +19,8 @@ class PumbBankService(Service):
     url_cash: Final[str] = PUMB_BANK_URL
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)
-
+    first_appeared_currency = InternationalCurrency.usd
+    second_appeared_currency = InternationalCurrency.eur
     async def get_cash_exchange_rate(self) -> BankExchangeRate | None:
         status_code, page = await self.request_repo.get_request(url=self.url_cash)
         if status_code != 200:
