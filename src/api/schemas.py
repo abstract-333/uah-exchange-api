@@ -2,7 +2,7 @@ import time
 from enum import Enum
 from typing import Final
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class BanksAvailable(str, Enum):
@@ -25,6 +25,8 @@ class NationalCurrency(str, Enum):
 
 
 class ExchangeRate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     first_currency: InternationalCurrency = Field(
         max_length=3, min_length=3, examples=["USD", "EUR"]
     )
@@ -37,5 +39,7 @@ class ExchangeRate(BaseModel):
 
 
 class BankExchangeRate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     bank_name: str = Field(examples=["PrivatBank", "MonoBank"])
     rates: list[ExchangeRate] | None
