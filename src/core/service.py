@@ -1,4 +1,5 @@
-from abc import abstractmethod
+from abc import abstractmethod, ABC
+
 from src.api.schemas import InternationalCurrency, ExchangeRate
 
 
