@@ -1,6 +1,11 @@
 from typing import Final, List
 
-from src.api.schemas import ExchangeRate, BankExchangeRate, InternationalCurrency
+from src.api.schemas import (
+    ExchangeRate,
+    BankExchangeRate,
+    InternationalCurrency,
+    BanksAvailable,
+)
 from src.core.repository import Repository
 from src.core.urls import PRIVAT_BANK_ONLINE_URL, PRIVAT_BANK_CASH_URL
 from src.core.service import Service, set_first_appeared_currencies
@@ -8,7 +13,7 @@ from src.redis_manager.repository import RedisRepository
 
 
 class PrivatBankService(Service):
-    bank_name: Final[str] = "PrivatBank"
+    bank_name: Final[BanksAvailable] = BanksAvailable.privat_bank
     url_online: Final = PRIVAT_BANK_ONLINE_URL
     url_cash: Final = PRIVAT_BANK_CASH_URL
     request_repo: Final = Repository()

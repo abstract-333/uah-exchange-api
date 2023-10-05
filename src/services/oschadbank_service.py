@@ -2,7 +2,7 @@ from typing import Final
 
 from bs4 import BeautifulSoup
 
-from src.api.schemas import InternationalCurrency
+from src.api.schemas import InternationalCurrency, BanksAvailable
 from src.api.schemas import BankExchangeRate, ExchangeRate, NationalCurrency
 from src.core.repository import Repository
 from src.core.service import Service
@@ -11,7 +11,7 @@ from src.redis_manager.repository import RedisRepository
 
 
 class OschadBankService(Service):
-    bank_name: Final[str] = "OschadBank"
+    bank_name: Final[BanksAvailable] = BanksAvailable.oschad_bank
     url_cash: Final[str] = OSCHAD_BANK_URL
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)

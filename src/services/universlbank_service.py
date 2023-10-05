@@ -7,6 +7,7 @@ from src.api.schemas import (
     NationalCurrency,
     BankExchangeRate,
     InternationalCurrency,
+    BanksAvailable,
 )
 from src.core.repository import Repository
 from src.core.service import Service
@@ -14,7 +15,7 @@ from src.redis_manager.repository import RedisRepository
 
 
 class UniversalBankService(Service):
-    bank_name: Final[str] = "UniversalBank"
+    bank_name: Final[BanksAvailable] = BanksAvailable.universal_bank
     url_cash_online: Final[str] = UNIVERSAL_BANK_URL
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)

@@ -5,6 +5,7 @@ from src.api.schemas import (
     InternationalCurrency,
     NationalCurrency,
     BankExchangeRate,
+    BanksAvailable,
 )
 from src.core.repository import Repository
 from src.core.service import Service, set_first_appeared_currencies
@@ -13,7 +14,7 @@ from src.redis_manager.repository import RedisRepository
 
 
 class MonoBankService(Service):
-    bank_name: Final[str] = "MonoBank"
+    bank_name: Final[BanksAvailable] = BanksAvailable.mono_bank
     url_online: Final = MONO_BANK_ONLINE_URL
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)

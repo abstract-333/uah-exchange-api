@@ -7,6 +7,7 @@ from src.api.schemas import (
     NationalCurrency,
     BankExchangeRate,
     InternationalCurrency,
+    BanksAvailable,
 )
 from src.core.repository import Repository
 from src.core.service import Service
@@ -15,12 +16,13 @@ from src.redis_manager.repository import RedisRepository
 
 
 class PumbBankService(Service):
-    bank_name: Final[str] = "PumbBank"
+    bank_name: Final[BanksAvailable] = BanksAvailable.pumb_bank
     url_cash: Final[str] = PUMB_BANK_URL
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)
     first_appeared_currency = InternationalCurrency.usd
     second_appeared_currency = InternationalCurrency.eur
+
     async def get_cash_exchange_rate(self) -> BankExchangeRate | None:
         status_code, page = await self.request_repo.get_request(url=self.url_cash)
         if status_code != 200:

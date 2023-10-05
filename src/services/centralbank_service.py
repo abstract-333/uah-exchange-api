@@ -5,6 +5,7 @@ from src.api.schemas import (
     InternationalCurrency,
     NationalCurrency,
     BankExchangeRate,
+    BanksAvailable,
 )
 from src.core.repository import Repository
 from src.core.urls import CENTRAL_BANK_ONLINE_URL
@@ -13,7 +14,7 @@ from src.redis_manager.repository import RedisRepository
 
 
 class CentralBankService(Service):
-    bank_name: Final[str] = "CentralBank"
+    bank_name: Final[BanksAvailable] = BanksAvailable.central_bank
     url_online: Final = CENTRAL_BANK_ONLINE_URL
     request_repo: Final = Repository()
     redis_repo: Final = RedisRepository(name=bank_name)

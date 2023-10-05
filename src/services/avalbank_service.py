@@ -1,3 +1,4 @@
+from abc import ABC
 from typing import Final
 from bs4 import BeautifulSoup
 
@@ -6,6 +7,7 @@ from src.api.schemas import (
     NationalCurrency,
     BankExchangeRate,
     InternationalCurrency,
+    BanksAvailable,
 )
 from src.core.repository import Repository
 from src.core.service import Service
@@ -14,8 +16,8 @@ from src.redis_manager.repository import RedisRepository
 from src.utils.async_tasks import execute_tasks
 
 
-class AvalBankService(Service):
-    bank_name: Final[str] = "AvalBank"
+class AvalBankService(Service, ABC):
+    bank_name: Final[BanksAvailable] = BanksAvailable.aval_bank
     url_cash: Final[str] = AVAL_BANK_CASH_URL
     url_online: Final[str] = OSCHAD_BANK_URL
     request_repo: Final = Repository()

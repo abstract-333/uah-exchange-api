@@ -30,8 +30,8 @@ class RedisRepository:
 
         value = await redis_storage.get(name=self.name + name_prefix)
 
+        # Convert date that are stored as json to its primitive form
         if value is not None:
             return json.loads(value)
 
         return None
-        # Convert date that are stored as json to its primitive form
